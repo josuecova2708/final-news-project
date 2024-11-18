@@ -1,13 +1,57 @@
 "use client"
 import Link from 'next/link'
-import React, { useState } from 'react'
-
+import React, { useContext, useEffect, useState } from 'react'
+import { CategoryContext } from '@/CategoryContext'
+import axios from 'axios'
+import { usePathname } from 'next/navigation'
 export default function NavBar() {
     const [openDrop, setOpenDrop] = useState(false)
     const [openDrop2, setOpenDrop2] = useState(false)
     const [openMenu, setOpenMenu] = useState(false)
-const [category, setCategory]= useState("")
-console.log(category)
+    const { category, setCategory } = useContext(CategoryContext);
+    const { lan, setLan } = useContext(CategoryContext)
+    const { sour, setSour } = useContext(CategoryContext)
+    const pathname = usePathname()
+
+
+    const languages = ["ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt", "ru", "sv", "ud", "zh"]
+    const [sources, setSources] = useState([])
+    const fetchSources = async () => {
+        const key = "dc5ab85cd64f44f5abd51c8c10ef366f";
+        const response = await axios.get(
+            `https://newsapi.org/v2/top-headlines/sources?language=${lan}&apiKey=${key}`
+        );
+        return response.data.sources;
+    };
+    useEffect(() => {
+        try {
+            fetchSources().then((data) => {
+                setSources(data);
+            });
+        } catch (error) {
+            console.log(error.message);
+        }
+    }, [lan]);
+
+    console.log(sources);
+    function useMediaQuery(query) {
+        const [matches, setMatches] = useState(false);
+
+        useEffect(() => {
+            const media = window.matchMedia(query);
+            if (media.matches !== matches) {
+                setMatches(media.matches);
+            }
+            const listener = () => setMatches(media.matches);
+            media.addListener(listener);
+            return () => media.removeListener(listener);
+        }, [query, matches]);
+
+        return matches;
+    }
+    const isMdScreen = useMediaQuery('(min-width: 768px)');
+    console.log(openMenu)
+    console.log(isMdScreen)
     return (
         <>
 
@@ -38,146 +82,164 @@ console.log(category)
 
 
 
-                    {
-                        <div className=" w-full  hidden  md:block md:w-auto" id="navbar-dropdown">
+                    {(openMenu || isMdScreen) &&
+                        <div className=" w-full       md:block md:w-auto" id="navbar-dropdown">
                             <ul className="flex bg-bright-turquoise-100 w-full flex-col  font-medium p-4 md:p-0 mt-4   md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
                                 <Link href="/">
-                                    <li>
+                                    <li onClick={() => setOpenMenu(false)}>
                                         <p className="block py-2 px-3  rounded md:bg-transparent md:text-bright-turquoise-700 md:p-0 md:hover:underline" aria-current="page">Home</p>
                                     </li>
 
                                 </Link>
-                                <li className="relative ">
-                                    <button
-                                        onClick={() => setOpenDrop(!openDrop)}
-                                        id="dropdownNavbarLink"
-                                        data-dropdown-toggle="dropdownNavbar"
-                                        className="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200 md:hover:bg-transparent md:border-0  md:p-0 md:w-auto"
-                                    >
-                                        <span className='md:hover:underline'>
-                                            Idiomas
-                                        </span>
-
-                                        <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                        </svg>
-                                    </button>
-                                    {/* Dropdown menu */
-                                        openDrop &&
-                                        <div id="dropdownNavbar" className="absolute left-0 z-10  font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 mt-2">
-                                            <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownLargeButton">
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Earnings</a>
-                                                </li>
-                                            </ul>
-                                            <div className="py-1">
-                                                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
-                                            </div>
-                                        </div>
-
-
-                                    }
-
-                                </li>
-                                <li className="relative">
-                                    <button
-                                        onClick={() => setOpenDrop2(!openDrop2)}
-                                        id="dropdownNavbarLink"
-                                        data-dropdown-toggle="dropdownNavbar"
-                                        className="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200  md:hover:bg-transparent md:border-0  md:p-0 md:w-auto"
-                                    >
-                                        <span className='md:hover:underline'>
-                                            Fuentes
-
-                                        </span>
-                                        <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                        </svg>
-                                    </button>
-                                    {/* Dropdown menu */
-                                        openDrop2 &&
-                                        <div id="dropdownNavbar" className="absolute left-0 z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 mt-2">
-                                            <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownLargeButton">
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Earnings</a>
-                                                </li>
-                                            </ul>
-                                            <div className="py-1">
-                                                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
-                                            </div>
-                                        </div>
-
-                                    }
-
-
-                                </li>
                                 <Link
                                     href="/allNews"
                                 >
-                                    <li>
-                                        <p className=" cursor-pointer block py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200 md:hover:bg-transparent md:border-0 md:hover:underline md:p-0">Lista de noticias</p>
+                                    <li onClick={() => setOpenMenu(false)}>
+                                        <p className=" cursor-pointer block py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200 md:hover:bg-transparent md:border-0 md:hover:underline md:p-0">News List</p>
 
                                     </li>
 
                                 </Link>
+                                {pathname !== "/" &&
+                                    <>
+                                        <li className="relative ">
+                                            <button
+                                                onClick={() => {
+                                                    setOpenDrop(!openDrop)
+                                                    setOpenDrop2(false)
+                                                    setOpenMenu(true)
+                                                }
+                                                }
+                                                id="dropdownNavbarLink"
+                                                data-dropdown-toggle="dropdownNavbar"
+                                                className="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200 md:hover:bg-transparent md:border-0  md:p-0 md:w-auto"
+                                            >
+                                                <span className='md:hover:underline'>
+                                                    Languages
+                                                </span>
 
-                                <li>
-                                    <a href="#" className="block py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200 md:hover:bg-transparent md:border-0 md:hover:underline md:p-0">Suscripción</a>
-                                </li>
+                                                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                </svg>
+                                            </button>
+                                            {/* Dropdown menu */
+                                                openDrop &&
+                                                <div id="dropdownNavbar" className="absolute left-0 z-10  font-normal bg-bright-turquoise-50 divide-y divide-gray-100 rounded-lg shadow w-44 mt-2">
+                                                    <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownLargeButton">
 
+                                                        {languages.map((item, index) =>
+                                                            <li key={index}
+                                                                className="block px-4 py-2 hover:bg-bright-turquoise-300 hover:cursor-pointer"
+                                                                onClick={(e) => setLan(e.target.textContent)}
+                                                            >{item}</li>
+
+                                                        )
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+
+                                        </li>
+                                        <li className="relative">
+                                            <button
+                                                onClick={() => {
+                                                    setOpenDrop2(!openDrop2)
+                                                    setOpenDrop(false)
+                                                    setOpenMenu(true)
+                                                }}
+                                                id="dropdownNavbarLink"
+                                                data-dropdown-toggle="dropdownNavbar"
+                                                className="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-bright-turquoise-200  md:hover:bg-transparent md:border-0  md:p-0 md:w-auto"
+                                            >
+                                                <span className='md:hover:underline'>
+                                                    Sources
+
+                                                </span>
+                                                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                </svg>
+                                            </button>
+                                            {/* Dropdown menu */
+                                                openDrop2 &&
+                                                <div id="dropdownNavbar" className="absolute left-0 z-10 font-normal bg-bright-turquoise-50 divide-y divide-gray-100 rounded-lg shadow w-44 h-56 overflow-auto mt-2">
+                                                    <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownLargeButton">
+                                                        {sources.map((item, index) =>
+                                                            <li key={index}
+                                                                className="block px-4 py-2 hover:bg-bright-turquoise-300 hover:cursor-pointer"
+                                                                onClick={(e) => setSour(e.target.textContent)}
+                                                            >{item?.id}</li>
+                                                        )
+                                                        }
+
+                                                    </ul>
+
+                                                </div>
+
+                                            }
+
+
+                                        </li>
+                                    </>
+                                }
+                               
                             </ul>
                         </div>}
                 </div>
 
             </nav>
-            <nav className="bg-bright-turquoise-100 border-t-2 border-bright-turquoise-950">
-                <div className="max-w-screen-xl px-4 py-3 mx-auto">
-                    <div className="flex items-center">
-                        <ul className="flex flex-row font-medium mt-0 space-x-8 text-sm">
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Business
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Entertainment
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            General
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Health
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Science
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Sports
-                            </li>
-                            <li onClick={(e)=>setCategory(e.target.textContent.toLowerCase())}
-                             className="cursor-pointer text-bright-turquoise-950 hover:underline" >
-                            Technology
-                            </li>
-                        </ul>
+
+            {pathname !== "/allNews" && (
+                <nav className="bg-bright-turquoise-100 border-t-2  border-bright-turquoise-950">
+                    <div className=" max-w-screen-xl px-4 py-3 mx-auto">
+                        <div className="flex items-center">
+                            <ul className="flex flex-row flex-wrap font-medium mt-0 space-x-8 text-sm">
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Business
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Entertainment
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    General
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Health
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Science
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Sports
+                                </li>
+                                <li
+                                    onClick={(e) => setCategory(e.target.textContent.toLowerCase())}
+                                    className="cursor-pointer text-bright-turquoise-950 hover:underline"
+                                >
+                                    Technology
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            </nav>
+                </nav>
+            )}
 
         </>
 
